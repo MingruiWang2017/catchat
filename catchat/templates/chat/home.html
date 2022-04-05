@@ -26,10 +26,17 @@
         </div>
       </div>
       <div class="four wide column right floated right aligned hide-on-mobile">
-          Fork me on <a href="https://github.com/MingruiWang2017/catchat">Github</a><br>
+          <p>Fork me on <a href="https://github.com/MingruiWang2017/catchat">Github</a><br>
           2017 © <a href="https://helloflask.com">helloflask.com</a></p>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+  var socket = io('/');  // 全局socket对象
+</script>
 {% endblock %}

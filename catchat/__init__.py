@@ -6,7 +6,7 @@ from flask_wtf.csrf import CSRFError
 
 from catchat.blueprints.auth import auth_bp
 from catchat.blueprints.chat import chat_bp
-from catchat.extensions import db, login_manager, csrf, moment
+from catchat.extensions import db, login_manager, csrf, moment, socketio
 from catchat.models import User, Message
 from catchat.settings import config
 
@@ -28,6 +28,7 @@ def create_app(config_name=None):
 
 def register_extensions(app):
     db.init_app(app)
+    socketio.init_app(app, cors_allowed_origins='*')
     login_manager.init_app(app)
     csrf.init_app(app)
     moment.init_app(app)
@@ -113,3 +114,7 @@ def register_commands(app):
         db.session.commit()
 
         click.echo('Done.')
+
+
+if __name__ == '__main__':
+    socketio.run(create_app())
