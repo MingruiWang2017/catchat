@@ -11,6 +11,42 @@ $(document).ready(function () {
         }
     });
 
+    function scrollToBottom() {
+        var $messages = $('.messages');
+        $messages.scrollTop($messages[0].scrollHeight);
+    }
+
+    var page = 1;
+
+    function load_messages() {
+        var $messages = $('.messages');
+        var position = $messages.scrollTop();
+        if (position === 0 && socket.nsp !== '/anonymous') {
+            page ++;  // 叠加页数值
+            $('.ui.loader').toggleClass('active');  // 激活加载滚动条
+            $.ajax({
+                url: messages_url,  // /messages 的url以提前在基模板定义
+                type: 'GET',
+                data: {page: page},  // 查询字符串page页数
+                success: function (data ){
+                    var before_height = $messages[0].scrollHeight;
+                    $(data).prependTo(".messages").hide().fadeIn(800);  // 插入新获取的消息
+                    var after_height = $messages[0].scrollHeight;
+                    flask_moment_render_all();  // 渲染时间
+                    $messages.scrollTop(after_height - before_height);  // 计算新加入消息的高度，进行跳转
+                    $('.ui.loader').toggleClass('active');  // 关闭滚动条
+                    activateSemantics();
+                },
+                error: function () {
+                    alert('No more messages.');  // 请求返回404时，弹出提示消息
+                    $('.ui.loader').toggleClass('active');
+                }
+            });
+        }
+    }
+
+    $('.messages').scroll(load_messages);  // .messages类元素触发scroll事件时，就执行加载消息
+
     // 处理socketio事件
     socket.on('user count', function (data) {
         $('#user-count').html(data.count);

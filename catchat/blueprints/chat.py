@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
 from flask_socketio import emit
 
@@ -56,7 +56,8 @@ def disconnect():
 
 @chat_bp.route('/')
 def home():
-    messages = Message.query.order_by(Message.timestamp.asc())
+    amount = current_app.config['CATCHAT_MESSAGE_PER_PAGE']
+    messages = Message.query.order_by(Message.timestamp.asc())[-amount:]
     user_amount = User.query.count()
     return render_template('chat/home.html', messages=messages, user_amount=user_amount)
 
@@ -65,6 +66,16 @@ def home():
 def anonymous():
     """匿名聊天室视图函数"""
     return render_template('chat/anonymous.html')
+
+
+@chat_bp.route('/messages')
+def get_messages():
+    """分页获取消息"""
+    page = request.args.get('page', 1, type=int)
+    pagination = Message.query.order_by(Message.timestamp.desc()).paginate(
+        page, per_page=current_app.config['CATCHAT_MESSAGE_PER_PAGE'])  # 按时间降序获取消息
+    messages = pagination.items
+    return render_template('chat/_messages.html', messages=messages[::-1])  # 在按照时间升序渲染消息
 
 
 @chat_bp.route('/profile', methods=['GET', 'POST'])

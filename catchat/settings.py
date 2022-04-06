@@ -13,6 +13,8 @@ else:
 class BaseConfig(object):
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev secret key')
 
+    CATCHAT_MESSAGE_PER_PAGE = 30
+
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', prefix + os.path.join(basedir, 'data-dev.db'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
