@@ -10,7 +10,10 @@ def to_html(raw):
                     'del', 'div', 'em', 'img', 'p', 'pre', 'strong',
                     'span', 'ul', 'li', 'ol']
     allowed_attributes = ['src', 'title', 'alt', 'href', 'class']
-    html = markdown(raw, output_format='html')  # 将Markdown转为html
+    # 将Markdown转为html, 使用代码高亮扩展codehilite和代码块扩展fenced_code美化代码片段
+    html = markdown(raw, output_format='html',
+                    extensions=['markdown.extensions.fenced_code',
+                                'markdown.extensions.codehilite'])
     clean_html = clean(html, tags=allowed_tags, attributes=allowed_attributes)  # 清洗HTML
     return linkify(clean_html)  # 将HTML文本中的url转换为<a>包裹的链接
 

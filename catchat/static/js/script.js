@@ -72,6 +72,16 @@ $(document).ready(function () {
     // submit message
     $('#message-textarea').on('keydown', new_message.bind(this));
 
+    // submit snippet 代码输入弹窗
+    $('#snippet-button').on('click', function () {
+        var $snippet_textarea = $('#snippet-textarea');
+        var message = $snippet_textarea.val();  // 获取代码片段内容
+        if (message.trim() !== '') {
+            socket.emit('new message', message);
+            $snippet_textarea.val('')  // 清空内容
+        }
+    });
+
     // open message modal on mobile
     $('#message-textarea').focus(function () {
         if (screen.width < 600) {
@@ -109,6 +119,10 @@ $(document).ready(function () {
 
         $('#show-help-modal').on('click', function () {
             $('.ui.modal.help').modal({blurring: true}).modal('show');
+        });
+
+        $('#show-snippet-modal').on('click', function () {
+            $('.ui.modal.snippet').modal({blurring: true}).modal('show');
         });
 
         $('.pop-card').popup({
