@@ -1,6 +1,7 @@
 $(document).ready(function () {
     // var socket = io.connect();
     var popupLoading = '<i class="notched circle loading icon green"></i> Loading...';
+    var message_count = 0;
     var ENTER_KEY = 13;
 
     $.ajaxSetup({
@@ -22,13 +23,13 @@ $(document).ready(function () {
         var $messages = $('.messages');
         var position = $messages.scrollTop();
         if (position === 0 && socket.nsp !== '/anonymous') {
-            page ++;  // 叠加页数值
+            page++;  // 叠加页数值
             $('.ui.loader').toggleClass('active');  // 激活加载滚动条
             $.ajax({
                 url: messages_url,  // /messages 的url以提前在基模板定义
                 type: 'GET',
                 data: {page: page},  // 查询字符串page页数
-                success: function (data ){
+                success: function (data) {
                     var before_height = $messages[0].scrollHeight;
                     $(data).prependTo(".messages").hide().fadeIn(800);  // 插入新获取的消息
                     var after_height = $messages[0].scrollHeight;
@@ -53,6 +54,15 @@ $(document).ready(function () {
     });
 
     socket.on('new message', function (data) {
+        // 实现状态栏消息提醒
+        message_count++;
+        if (!document.hasFocus()) {
+            document.title = '(' + message_count + ')' + 'CatChat';
+        }
+        if (data.user_id !== current_user_id) {  // 当其他用户发送来消息时，进行提示
+            messageNotify(data);
+        }
+
         $('.messages').append(data.message_html);  // 将新消息添加到消息列表中
         flask_moment_render_all();  // 渲染消息中的时间戳
         scrollToBottom();  // 滚动到页面底部新消息处
@@ -60,7 +70,7 @@ $(document).ready(function () {
     });
 
     function new_message(e) {
-        var $textarea = $ ('#message-textarea');
+        var $textarea = $('#message-textarea');
         var message_body = $textarea.val().trim(); // 获取消息内容
         if (e.which === ENTER_KEY && !e.shiftKey && message_body) {  // 如果消息不为空，用户按下回车，同时没按shift
             e.preventDefault();  // 阻止默认行为，即按回车换行
@@ -103,6 +113,24 @@ $(document).ready(function () {
     function scrollToBottom() {
         var $messages = $('.messages');
         $messages.scrollTop($messages[0].scrollHeight);
+    }
+
+    function messageNotify(data) {
+        if (Notification.permission !== 'granted')
+            Notification.requestPermission();  // 向用户请求通知权限
+        else {
+            var notification = new Notification("Message from" + data.nickname, {
+                icon: data.gravatar,
+                body: data.message_body.replace(/(<([^>]+)>)/ig, "")
+            });
+
+            notification.onclick = function () {
+                window.open(root_url);
+            };
+            setTimeout(function () {
+                notification.close()
+            }, 4000);
+        }
     }
 
     function activateSemantics() {
@@ -149,6 +177,22 @@ $(document).ready(function () {
     }
 
     function init() {
+        // 实现桌面系统通知
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!Notification) {
+                alert('Desktop notifications not available in your browser.');
+                return;
+            }
+
+            if (Notification.permission !== 'granted')
+                Notification.requestPermission();
+        });
+
+        $(window).focus(function () {  // 当窗口被激活时，清除消息计数
+            message_count = 0;
+            document.title = 'CatChat';
+        });
+
         activateSemantics();
         scrollToBottom();
     }
