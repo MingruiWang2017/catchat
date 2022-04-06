@@ -5,7 +5,7 @@ from flask_socketio import emit
 from catchat.extensions import db, socketio
 from catchat.forms import ProfileForm
 from catchat.models import Message, User
-from catchat.utils import flash_errors
+from catchat.utils import flash_errors, to_html
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -15,7 +15,8 @@ online_users = []  # 用于保存当前在线用户
 @socketio.on('new message')
 def new_message(message_body):
     """监听客户端发送来的new message事件，并进行广播"""
-    message = Message(author=current_user._get_current_object(), body=message_body)
+    html_message = to_html(message_body)
+    message = Message(author=current_user._get_current_object(), body=html_message)
     db.session.add(message)
     db.session.commit()
     emit('new message',
@@ -26,11 +27,12 @@ def new_message(message_body):
 @socketio.on('new message', namespace='/anonymous')
 def new_anonymous_message(message_body):
     """/anonymous命名空间下的匿名聊天室, 这里的消息不保存"""
+    html_message = to_html(message_body)
     avatar = 'https://cravatar.cn/avatar/?d=mp'
     nickname = 'Anonymous'
     emit('new message',
          {'message_html': render_template('chat/_anonymous_message.html',
-                                          message=message_body,
+                                          message=html_message,
                                           avatar=avatar,
                                           nickname=nickname)},
          broadcast=True, namespace='/anonymous')

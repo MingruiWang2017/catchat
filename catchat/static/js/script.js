@@ -107,6 +107,10 @@ $(document).ready(function () {
             $('.menu.sidebar').sidebar('setting', 'transition', 'overlay').sidebar('toggle');
         });
 
+        $('#show-help-modal').on('click', function () {
+            $('.ui.modal.help').modal({blurring: true}).modal('show');
+        });
+
         $('.pop-card').popup({
             inline: true,
             on: 'hover',
