@@ -44,6 +44,15 @@
             <div>{{ error_message }}</div>
         </div>
         {% endfor %}
+        <div class="ui horizontal divider">Or sign in with</div>
+        <div class="ui message">
+            <a class="icon" href="{{ url_for('oauth.oauth_login', provider_name='github') }}">
+                <i class="github big icon black"></i>
+            </a>
+            <a class="icon" href="{{ url_for('oauth.oauth_login', provider_name='google') }}">
+                <i class="google big icon red"></i>
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}
