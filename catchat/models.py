@@ -1,10 +1,11 @@
 import hashlib
 from datetime import datetime
 
-from flask_login import UserMixin
+from flask import current_app
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from catchat.extensions import db
+from catchat.extensions import db, login_manager
 
 
 class User(UserMixin, db.Model):
@@ -34,9 +35,24 @@ class User(UserMixin, db.Model):
             self.email_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
 
     @property
+    def is_admin(self):
+        return self.email == current_app.config['CATCHAT_ADMIN_EMAIL']
+
+    @property
     def gravatar(self):
         """使用cravatar的图像服务获取用户头像url"""
         return 'https://cravatar.cn/avatar/%s?d=robohash' % self.email_hash
+
+
+class Guest(AnonymousUserMixin):
+    """匿名用户，游客，实现is_admin方法以便统一使用"""
+
+    @property
+    def is_admin(self):
+        return False
+
+
+login_manager.anonymous_user = Guest
 
 
 class Message(db.Model):

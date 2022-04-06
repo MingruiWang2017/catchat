@@ -110,6 +110,15 @@ $(document).ready(function () {
         }
     });
 
+    // quote message 引用用户消息
+    $('.quote-button').on('click', function () {
+        var $textarea = $('#message-textarea');
+        var message = $(this).parent().parent().parent().find('.message-body').text();
+        $textarea.val('> ' + message + '\n\n');
+        $textarea.val($textarea.val()).focus()
+    });
+
+
     function scrollToBottom() {
         var $messages = $('.messages');
         $messages.scrollTop($messages[0].scrollHeight);
@@ -196,6 +205,36 @@ $(document).ready(function () {
         activateSemantics();
         scrollToBottom();
     }
+
+    // delete message
+    $('.delete-button').on('click', function () {
+        var $this = $(this);
+        $.ajax({
+            type: 'DELETE',
+            url: $this.data('href'),
+            success: function () {
+                $this.parent().parent().parent().remove();
+            },
+            error: function () {
+                alert('Oops, something was wrong!')
+            }
+        });
+    });
+
+    // delete user
+    $('.delete-user-button').on('click', function () {
+        var $this = $(this);
+        $.ajax({
+            type: 'DELETE',
+            url: $this.data('href'),
+            success: function () {
+                alert('Success, this user is gone!')
+            },
+            error: function () {
+                alert('Oops, something was wrong!')
+            }
+        });
+    });
 
     init();
 
